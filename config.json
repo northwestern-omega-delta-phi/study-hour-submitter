@@ -1,0 +1,22 @@
+{
+    "installed": {
+        "client_id": "471282241173-opjg10393cm2q3lqbjfn9qq7ltb8imup.apps.googleusercontent.com",
+        "project_id": "service-hour-submission",
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_secret": "JGh-yzY1ou4ugUSJBTUI4EFd",
+        "redirect_uris": [
+            "urn:ietf:wg:oauth:2.0:oob",
+            "http://localhost"
+        ],
+        "odphi_username": "rojaswestall@gmail.com",
+        "odphi_password": "password1234",
+        "region": "Midwest",
+        "school": "Northwestern University",
+        "semester": "Winter",
+        "year": "2019",
+        "sheets_id": "1WCr38Wh-AsjKZTeLfOor6beSrSR-fUz9tV35RGWslFY",
+        "name_on_study_hours_sheet": "Gabriel Rojas-Westall"
+    }
+}

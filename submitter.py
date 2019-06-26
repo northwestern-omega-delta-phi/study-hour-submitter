@@ -12,7 +12,9 @@ from bs4 import BeautifulSoup
 
 # For Development
 import json
+from datetime import timedelta
 from datetime import date
+import random
 
 # Global Variables
 with open('config.json') as json_file:  
@@ -30,8 +32,7 @@ RANGE_NAME = 'Hours!A:Z'
 # Wanted people to put the date in how they were comfortable (MM/DD/YYYY)
 def getDateObject(date_string):
     month_day_year = date_string.split('-')
-    new_string = month_day_year[2] + '-' + month_day_year[0] + '-' + month_day_year[1]
-    return date.fromisoformat(new_string)
+    return date(int(month_day_year[2]), int(month_day_year[0]), int(month_day_year[1]))
 
 # Function that checks the format of what the user inputs to make sure it's a valid date
 def checkDateFormat(date_input):
@@ -101,22 +102,82 @@ def main():
     if not values:
         print('No data found was found in the google sheet. Please make sure the ID that was provided for the service sheet in config.json is correct, that you have access to the sheet, and that the sheet\'s data is in the Hours tab')
     else:
-        study_hours = []
         total_hours = 0
         locations = []
         for i, row in enumerate(values):
             if (row[0] == config["name_on_study_hours_sheet"]):
-                total_hours = row[1]
+                total_hours = int(row[1])
                 for location in row[2:]:
                     locations.append(location)
+                break
     
-# The idea is that we want to distribute the hours equally throughout the quarter, while still having it randomized
-# at least a little. SO, we start the monday of the first week (if it falls in the range) and assign a random value
-# of 0-2 hours, then do the same for the next monday and the next until we reach the last one, then we start over
-# doing the same for wednesdays, fridays, tuesdays, thursdays, sundays, then saturdays. After going through all 
-# the days, we loop back around to the first week with monday and restart the sequence. There is a max of 5 hours
-# studied in a single day so it doesn't become suspicious. There might be a better way to do this but I'm not 
-# putting in that much effort to figure this out. 
+        # The idea is that we want to distribute the hours equally throughout the quarter, while still having it randomized
+        # at least a little. SO, we start the monday of the first week (if it falls in the range) and assign a random value
+        # of 0-2 hours, then do the same for the next monday and the next until we reach the last one, then we start over
+        # doing the same for wednesdays, tuesdays, thursdays, sundays, saturdays, then fridays. After going through all 
+        # the days, we loop back around to the first week with monday and restart the sequence. There is a max of 5 hours
+        # studied in a single day so it doesn't become suspicious. There might be a better way to do this but I'm not 
+        # putting in that much effort to figure this out. 
+
+        # January 7th, March 15th
+
+        # Define constant timedeltas
+        seven_days = timedelta(days=7)
+        first_monday = start_date - timedelta(days=start_date.weekday())
+        first_tuesday = first_monday + timedelta(days=1)
+        first_wednesday = first_monday + timedelta(days=2)
+        first_thursday = first_monday + timedelta(days=3)
+        first_friday = first_monday + timedelta(days=4)
+        first_saturday = first_monday + timedelta(days=5)
+        first_sunday = first_monday + timedelta(days=6)
+        days = [first_monday, first_wednesday, first_tuesday, first_thursday, first_sunday, first_saturday, first_friday]
+
+        # Create the list of study hours
+        # Each object has a date, location, and number of hours
+        study_hours = {}
+        hours_left = total_hours
+        current_date = first_monday
+        current_day = 0
+        while hours_left > 0:
+            rand = random.randint(0,2)
+            if rand == 0:
+                current_date += seven_days
+                continue
+            elif rand <= hours_left:
+                # the random number is less than how many hours we have left to finish
+                if start_date <= current_date <= end_date:
+                    study_session = {"location": locations[random.randint(0, len(locations) - 1)], "hours": rand}
+                    if current_date in study_hours.keys():
+                        if study_hours[current_date]["hours"] + rand > 5:
+                            continue
+                        else:
+                            study_hours[current_date]["hours"] += rand
+                    else:
+                        study_hours[current_date] = study_session
+                    hours_left -= rand
+                    current_date += seven_days
+                    continue
+                elif current_date > end_date:
+                    # the date is out of bounds, past the end date. Move on to the next day of the week
+                    if current_day != 6:
+                        current_day += 1
+                    else:
+                        current_day = 0
+                    current_date = days[current_day]
+                    continue
+                else:
+                    # The date is before the start date, go to the next week
+                    current_date += seven_days
+                    continue
+            else:
+                continue
+
+        print(study_hours)
+
+
+
+
+
 
 
         # ##########################################
